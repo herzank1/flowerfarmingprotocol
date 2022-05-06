@@ -1,0 +1,1247 @@
+//pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
+
+
+
+interface IBEP20 {
+  /**
+   * @dev Returns the amount of tokens in existence.
+   */
+  function totalSupply() external view returns (uint256);
+
+  /**
+   * @dev Returns the token decimals.
+   */
+  function decimals() external view returns (uint8);
+
+  /**
+   * @dev Returns the token symbol.
+   */
+  function symbol() external view returns (string memory);
+
+  /**
+  * @dev Returns the token name.
+  */
+  function name() external view returns (string memory);
+
+  /**
+   * @dev Returns the bep token owner.
+   */
+  function getOwner() external view returns (address);
+
+  /**
+   * @dev Returns the amount of tokens owned by `account`.
+   */
+  function balanceOf(address account) external view returns (uint256);
+
+  /**
+   * @dev Moves `amount` tokens from the caller's account to `recipient`.
+   *
+   * Returns a boolean value indicating whether the operation succeeded.
+   *
+   * Emits a {Transfer} event.
+   */
+  function transfer(address recipient, uint256 amount) external returns (bool);
+
+  /**
+   * @dev Returns the remaining number of tokens that `spender` will be
+   * allowed to spend on behalf of `owner` through {transferFrom}. This is
+   * zero by default.
+   *
+   * This value changes when {approve} or {transferFrom} are called.
+   */
+  function allowance(address _owner, address spender) external view returns (uint256);
+
+  /**
+   * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+   *
+   * Returns a boolean value indicating whether the operation succeeded.
+   *
+   * IMPORTANT: Beware that changing an allowance with this method brings the risk
+   * that someone may use both the old and the new allowance by unfortunate
+   * transaction ordering. One possible solution to mitigate this race
+   * condition is to first reduce the spender's allowance to 0 and set the
+   * desired value afterwards:
+   * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+   *
+   * Emits an {Approval} event.
+   */
+  function approve(address spender, uint256 amount) external returns (bool);
+
+  /**
+   * @dev Moves `amount` tokens from `sender` to `recipient` using the
+   * allowance mechanism. `amount` is then deducted from the caller's
+   * allowance.
+   *
+   * Returns a boolean value indicating whether the operation succeeded.
+   *
+   * Emits a {Transfer} event.
+   */
+  function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+
+  /**
+   * @dev Emitted when `value` tokens are moved from one account (`from`) to
+   * another (`to`).
+   *
+   * Note that `value` may be zero.
+   */
+  event Transfer(address indexed from, address indexed to, uint256 value);
+
+  /**
+   * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+   * a call to {approve}. `value` is the new allowance.
+   */
+  event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+library SafeMath {
+  /**
+   * @dev Returns the addition of two unsigned integers, reverting on
+   * overflow.
+   *
+   * Counterpart to Solidity's `+` operator.
+   *
+   * Requirements:
+   * - Addition cannot overflow.
+   */
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    require(c >= a, "SafeMath: addition overflow");
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the subtraction of two unsigned integers, reverting on
+   * overflow (when the result is negative).
+   *
+   * Counterpart to Solidity's `-` operator.
+   *
+   * Requirements:
+   * - Subtraction cannot overflow.
+   */
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    return sub(a, b, "SafeMath: subtraction overflow");
+  }
+
+  /**
+   * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+   * overflow (when the result is negative).
+   *
+   * Counterpart to Solidity's `-` operator.
+   *
+   * Requirements:
+   * - Subtraction cannot overflow.
+   */
+  function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    require(b <= a, errorMessage);
+    uint256 c = a - b;
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the multiplication of two unsigned integers, reverting on
+   * overflow.
+   *
+   * Counterpart to Solidity's `*` operator.
+   *
+   * Requirements:
+   * - Multiplication cannot overflow.
+   */
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+    // benefit is lost if 'b' is also tested.
+    // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+    if (a == 0) {
+      return 0;
+    }
+
+    uint256 c = a * b;
+    require(c / a == b, "SafeMath: multiplication overflow");
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the integer division of two unsigned integers. Reverts on
+   * division by zero. The result is rounded towards zero.
+   *
+   * Counterpart to Solidity's `/` operator. Note: this function uses a
+   * `revert` opcode (which leaves remaining gas untouched) while Solidity
+   * uses an invalid opcode to revert (consuming all remaining gas).
+   *
+   * Requirements:
+   * - The divisor cannot be zero.
+   */
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    return div(a, b, "SafeMath: division by zero");
+  }
+
+  /**
+   * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+   * division by zero. The result is rounded towards zero.
+   *
+   * Counterpart to Solidity's `/` operator. Note: this function uses a
+   * `revert` opcode (which leaves remaining gas untouched) while Solidity
+   * uses an invalid opcode to revert (consuming all remaining gas).
+   *
+   * Requirements:
+   * - The divisor cannot be zero.
+   */
+  function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    // Solidity only automatically asserts when dividing by 0
+    require(b > 0, errorMessage);
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+   * Reverts when dividing by zero.
+   *
+   * Counterpart to Solidity's `%` operator. This function uses a `revert`
+   * opcode (which leaves remaining gas untouched) while Solidity uses an
+   * invalid opcode to revert (consuming all remaining gas).
+   *
+   * Requirements:
+   * - The divisor cannot be zero.
+   */
+  function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+    return mod(a, b, "SafeMath: modulo by zero");
+  }
+
+  /**
+   * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+   * Reverts with custom message when dividing by zero.
+   *
+   * Counterpart to Solidity's `%` operator. This function uses a `revert`
+   * opcode (which leaves remaining gas untouched) while Solidity uses an
+   * invalid opcode to revert (consuming all remaining gas).
+   *
+   * Requirements:
+   * - The divisor cannot be zero.
+   */
+  function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    require(b != 0, errorMessage);
+    return a % b;
+  }
+}
+
+
+contract Context {
+  // Empty internal constructor, to prevent people from mistakenly deploying
+  // an instance of this contract, which should be used via inheritance.
+  constructor () internal { }
+
+
+  function _msgSender() internal view returns (address payable) {
+    return msg.sender;
+  }
+
+  function _msgData() internal view returns (bytes memory) {
+    this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+    return msg.data;
+  }
+}
+
+contract Ownable is Context {
+  address   private _owner;
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+  
+  constructor () internal {
+    address msgSender = _msgSender();
+    _owner = msgSender;
+    emit OwnershipTransferred(address(0), msgSender);
+  }
+
+  
+  function owner() public view returns (address) {
+    return _owner;
+  }
+
+  
+  modifier onlyOwner() {
+    require(_owner == _msgSender(), "Ownable: caller is not the owner");
+    _;
+  }
+
+  
+  function renounceOwnership() public onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+  }
+
+  //dev Transfers ownership of the contract to a new account (`newOwner`).
+  //Can only be called by the current owner.
+   
+  function transferOwnership(address newOwner) public onlyOwner {
+    _transferOwnership(newOwner);
+  }
+
+  //dev Transfers ownership of the contract to a new account (`newOwner`).
+  
+  function _transferOwnership(address newOwner) internal {
+    require(newOwner != address(0), "Ownable: new owner is the zero address");
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+  }
+}
+
+
+
+contract investmentSystem{
+    using SafeMath for uint256;
+  
+    token[] tokenList; //aray tokens list
+    plan[] plans; //plans list
+    mapping (address => bool) members; //only investors become a member
+    mapping (address => address) referrals; //referral list
+    mapping (address => investment[]) investments; //
+
+    address HeadWallet = 0x7fe108160192BAE9a17c9594b2A33fCc0ff2Af56;
+
+    uint8 referralCommission = 8; 
+    uint8 HeadWalletCommission = 2;    
+    uint8 buySellCommission = 2;
+
+    function _register(address _referral) external returns (bool) {
+        //check if already referred
+        address ref = referrals[msg.sender];
+        require(ref == address(0),"you already registred!");
+
+        if(_referral == address(0) || _referral == HeadWallet){
+          referrals[msg.sender] = HeadWallet;
+        }else{
+        require(_referral != msg.sender,"you can't reffer to yourself");
+        require(members[_referral],"this address is not a member");
+        referrals[msg.sender] = _referral;
+
+        }
+
+        return true;
+    }
+
+    function isRegistred(address _address)external view returns(bool){
+      return referrals[_address] != address(0);
+    }
+
+    function isMember(address _address)external view returns(bool){
+      return members[_address];
+    }
+
+    modifier onlyHeadWallet{
+      require(msg.sender == HeadWallet,"you're not head wallet");
+      _;
+    }
+
+    function changeHeadWallet(address _address)external onlyHeadWallet{
+      require(_address != address(0) && _address != msg.sender,"ivalid address!");
+      HeadWallet = _address;
+    }
+
+    // gets referrals address
+    function _getReferral(address _address) external view returns (address) {
+        return referrals[_address];
+    }
+
+
+    function _restartInvestment(address _address, uint8 _investmentIndex)internal returns (bool){
+      investments[_address][_investmentIndex].timeStamp = block.timestamp;
+      return true;
+    }
+
+    //removes investment by index
+    function _removeInvestment(address _address, uint8 _investmentIndex)internal returns (bool){
+    
+      uint256 inv_count = investments[_address].length; // counts investments of address
+      investments[_address][_investmentIndex] = investments[_address][inv_count-1];
+      investments[_address].pop();
+
+      if (inv_count > investments[_address].length ){
+      return true;
+
+      }else {
+      return false;
+
+      }
+       
+    }
+
+    //register investment in mapping 
+ function _recordInvestment(string memory _token, address _address, uint256 _mount, plan memory _plan)internal returns (bool){
+
+        uint256 count = investments[_address].length;
+        investment memory n;
+        n.id = count;
+        n.token = _token;
+        n.mount = _mount;
+        n.timeStamp = block.timestamp;
+        n.returnMount = _plan.returnMount;  //example 115%
+        n.duration = _plan.duration;
+
+        investments[_address].push(n);
+        return true;
+
+
+    }
+
+    function _getInvestmentsCount(address _address)external view returns (uint256){
+        return investments[_address].length;
+
+    }
+
+    function _getInvestment(address _address,uint8 _index)external view returns (investment memory){
+       investment memory get = investments[_address][_index];
+        return get;
+
+    }
+
+    function _getInvestmentReadable(address _address,uint256 index)external view returns (
+      
+        uint256 _id,
+        string memory _token,
+        uint256 _mount,
+        uint256 _returnMount,
+        uint256 _timeStamp,
+        uint256 _duration
+
+    ){
+
+          investment memory n =investments[_address][index];
+
+         _id = n.id;
+         _token = n.token;
+         _mount = n.mount;
+         _returnMount = n.returnMount;
+         _timeStamp = n.timeStamp;
+         _duration = n.duration;
+        // _plan = n.plan;
+
+    }
+
+    function _getInvestments(address _address)external view returns ( investment[] memory){
+        return investments[_address];
+
+    }
+
+    function _checkIfInvestmentIsReady(address _address, uint256 investmentIndex)internal view returns (bool){
+      
+      investment memory get = investments[_address][investmentIndex];
+
+       require(get.timeStamp > 0,"Error field time");
+
+       if (block.timestamp> (get.timeStamp + get.duration)){
+          return true;
+       }else{
+
+         return false;
+       } 
+
+     }
+
+     function getCurrentTimeStamp()external view returns (uint256){
+       return block.timestamp;
+     }
+
+    //structure of investment
+
+     struct investment {
+        uint256 id;
+        string token; //means symbol for index accessing
+        uint256 mount;
+        uint256 timeStamp;
+        uint256 duration;
+        uint256 returnMount;//in % example 150%
+
+    }
+
+    struct plan {
+
+        bool initialized;
+        uint256 duration;
+        uint256 returnMount; //in % example 150%
+        uint256 minAmount;
+        uint256 maxAmount;
+
+    }
+
+    
+    function amountIsValid(plan memory _plan, uint256 _amount)internal pure returns(bool){
+
+            if(_amount >= _plan.minAmount && _amount <= _plan.maxAmount ){
+              return true;
+            }else{
+              return false;
+            }
+            
+    }
+
+    function plansCount()external view returns(uint256){
+      return plans.length;
+    }
+
+    function getPlan(uint256 _planIndex)external view returns ( plan memory){
+    return plans[_planIndex];
+    }
+
+    function getPlanReadable(uint256 _planIndex)external view returns(
+      
+      uint _index,
+      bool _initialized,
+      uint256 _duration,
+      uint256 _returnMount,
+      uint256 _minAmount,
+      uint256 _maxAmount
+    
+    ){
+      plan memory get = plans[_planIndex];
+
+      _index = _planIndex;
+      _initialized = get.initialized;
+      _duration = get.duration;
+      _returnMount = get.returnMount;
+
+      _minAmount = get.minAmount;
+      _maxAmount = get.maxAmount;
+    }
+
+
+    function _referralCommission() external view returns (uint256){
+        return referralCommission;
+    }
+
+    function _headWalletCommission () external view returns (uint256){
+        return HeadWalletCommission ;
+    }
+
+    function addPlan(plan memory _plan)internal returns(bool){
+      plans.push(_plan);
+
+    }
+
+    
+    function addToken(string memory  _symbol, address _address, uint256 _priceInWei)internal returns(bool){
+
+    require(!tokenExist(_symbol),"This token already exist");
+
+    token memory _token;
+    _token._symbol = _symbol;
+    _token._address = _address;
+    _token._price =_priceInWei;
+
+    tokenList.push(_token);
+
+    return true;
+
+    }
+
+   
+
+    struct token{
+
+        string _symbol;
+        address _address;
+        uint256 _price; //(price in wei)
+
+    }
+
+    function getTokenReadable(string calldata _token)external view returns(
+
+        string memory _symbol,
+        address _address,
+        uint256 _price //(price in wei)
+    ){
+
+      token memory get = getTokenBySymbol(_token);
+
+      _symbol = get._symbol;
+      _address = get._address;
+      _price = get._price;
+
+    }
+
+    function getTokenBySymbol(string memory _symbol)internal view returns (token memory ){
+
+      for(uint i = 0 ; i < tokenList.length; i ++){
+        if (compareStrings(tokenList[i]._symbol,_symbol)){
+          return tokenList[i];
+        }
+
+      }
+ 
+    }
+
+    function tokenExist(string memory _symbol)internal view returns (bool){
+
+      for(uint i = 0 ; i < tokenList.length; i ++){
+        if (compareStrings(tokenList[i]._symbol,_symbol)){
+          return true;
+        }
+
+      }
+        
+      return false;
+    }
+
+
+ 
+  function calcTokenPriceFactor(uint256 _priceInWeiBNB, uint256 _externalTokenDecimals)internal pure  returns(uint256){
+    //calc a price factor when decimals not the same 
+
+    uint256 factor = 1 * 10 ** _externalTokenDecimals;
+    return _priceInWeiBNB  / factor;
+
+  }
+
+  function compareStrings(string memory a, string memory b) internal pure  returns (bool) {
+    return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
+  }
+
+   function fixFactorDecimal(uint256 _tokenDecimals)internal pure returns(uint256){
+
+    // returns decimals's diferences betwen 18 and token decimal
+    uint256 ajust = 18 - _tokenDecimals;
+    return 1 * 10 ** ajust;
+
+  }
+
+   
+}
+
+
+
+contract root is investmentSystem, IBEP20, Ownable{
+
+  event _received(address indexed _from, uint _value);
+  event _invest(address indexed _from, uint _value, string token);
+  event _reInvest(address indexed _from, uint _value, string token);
+  event _withdrawInvestment(address indexed _to, uint _value);
+  event _swapFlower(address indexed _from, string _flower, string _token);
+  event _systemChange(address indexed _from, string _change);
+
+  using SafeMath for uint256;
+
+  mapping (address => uint256) private _balances;
+  mapping (address => mapping (address => uint256)) private _allowances;
+
+  address DEAD = 0x000000000000000000000000000000000000dEaD;
+
+  uint256 private _totalSupply;
+  uint8 private _decimals;
+  string private _symbol;
+  string private _name;
+
+  string BNB = "BNB";
+
+  /*when totalsupply reached maxtotalsupply
+ investments and reinvestments were closed 
+ unless burns were made.*/
+
+  uint256 private _totalMaxSupply; 
+
+    constructor() public {
+
+      _decimals = 18;
+      _symbol = "FLOWER";
+      _name = "Flower";
+      _totalSupply = 0;
+
+     _totalMaxSupply = 5 * 10**14 * 10**18;
+
+      //first members
+     members[HeadWallet]=true; //add head wallet as first member
+     members[msg.sender]=true; //add creator
+
+      // GENERATE FIRST RESERVE 
+    uint256 initialSupply = 1000 * 10**18;
+    _balances[msg.sender] = initialSupply; //Creator first reserve
+    _totalSupply = initialSupply;
+
+      //PLANS GENERATION
+     
+      //bronze
+      plan memory _plan0;
+      _plan0.duration = 7 days ;
+      _plan0.returnMount = 102;
+      _plan0.minAmount = 0.0001 ether;
+      _plan0.maxAmount = 10 ether;
+      _plan0.initialized = true;
+
+      //silver
+       plan memory _plan1;
+      _plan1.duration = 15 days ;
+      _plan1.returnMount = 105;
+      _plan1.minAmount = 0.0001 ether;
+      _plan1.maxAmount = 10 ether;
+      _plan1.initialized = true;
+
+      //gold
+      plan memory _plan2;
+      _plan2.duration = 30 days ;
+      _plan2.returnMount = 115;
+      _plan2.minAmount = 0.0001 ether;
+      _plan2.maxAmount = 10 ether;
+      _plan2.initialized = true;
+
+      //platinum
+      plan memory _plan3;
+      _plan3.duration = 60 days ;
+      _plan3.returnMount = 150;
+      _plan3.minAmount = 0.01 ether;
+      _plan3.maxAmount = 100 ether;
+      _plan3.initialized = true;
+
+      //diamond
+       plan memory _plan4;
+      _plan4.duration = 120 days ;
+      _plan4.returnMount = 275;
+      _plan4.minAmount = 1 ether;
+      _plan4.maxAmount = 1000 ether;
+      _plan4.initialized = true;
+
+       //FLOWER
+       plan memory _plan5;
+      _plan5.duration = 180 days ;
+      _plan5.returnMount = 400; //it means 100% of inversion and 300% profit
+      _plan5.minAmount = 2 ether;
+      _plan5.maxAmount = 1000 ether;
+      _plan5.initialized = true;
+
+
+      addPlan(_plan0);
+      addPlan(_plan1);
+      addPlan(_plan2);
+      addPlan(_plan3);
+      addPlan(_plan4);
+      addPlan(_plan5);
+
+      //main Tokens fix price snapshot
+
+
+      // Binance-Peg BUSD Token
+      IBEP20 nToken1 = IBEP20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+      addToken(nToken1.symbol(),  0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56, 0.0026409181 ether);
+
+      //PancakeSwap Token
+      IBEP20 nToken2 = IBEP20(0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82);
+      addToken(nToken2.symbol(),  0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82, 0.019802122 ether);
+
+      //Binance-Peg BTCB Token
+      IBEP20 nToken3 = IBEP20(0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c);
+      addToken(nToken3.symbol(),  0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, 102.95778 ether);
+
+    }
+
+
+
+  function receive() external payable {
+     emit _received(msg.sender, msg.value);
+  }
+
+
+
+  function addNewToken(address _address, uint256 _priceInWei)external onlyOwner{
+    
+    require(_priceInWei > 0,"Prize 0");
+    IBEP20 nToken = IBEP20(_address);
+    addToken(nToken.symbol(),  _address, _priceInWei);
+
+    emit _systemChange(msg.sender,"new token");
+    
+
+  }
+
+
+  function viewTokens()external view returns (token[] memory _tokenList){
+    return tokenList;
+
+  }
+
+  function withdrawInvestProfit(uint8 _investIndex)external returns (bool){
+    require(_checkIfInvestmentIsReady(msg.sender,_investIndex) ,"the investment time has not been completed" );
+
+    investment memory get = investments[msg.sender][_investIndex];
+    //calculates total return of current token
+    uint256 profit = get.mount.mul(get.returnMount-100).div(100);//just profit calc
+    //calculates conversion to flower is investment is in BNB not will be convertion
+    uint256 decimals;
+    uint256 tokensToFlower;
+
+    if(compareStrings(get.token,BNB)){
+
+      tokensToFlower = profit; //if investment is BNB no convertion require
+
+    }else{
+      token memory getToken = getTokenBySymbol(get.token);  //get token price in wei
+      decimals = IBEP20(getToken._address).decimals(); // gets tokens decimals
+      tokensToFlower = calcTokentoBNB(getToken._price,profit,decimals); //covert token's mount to BNB equivalent
+    }
+   
+    //restart investment record
+    require(_restartInvestment(msg.sender,_investIndex),"restart error!!");
+
+    //sender recives flower with profit is like recived in BNB 
+    payFlower(msg.sender,tokensToFlower);
+
+    emit _withdrawInvestment(msg.sender,tokensToFlower);
+
+  }
+
+  function withdrawInvest(uint8 _investIndex)external returns (bool) {
+
+    require(_checkIfInvestmentIsReady(msg.sender,_investIndex) ,"the investment time has not been completed" );
+
+    investment memory get = investments[msg.sender][_investIndex];
+    //calculates total return of current token
+    uint256 TotalTokenReturn = get.mount.mul(get.returnMount).div(100);
+    //calculates conversion to flower is investment is in BNB not will be convertion
+    uint256 decimals;
+    uint256 tokensToFlower;
+
+    if(compareStrings(get.token,BNB)){
+
+      tokensToFlower = TotalTokenReturn; //if investment is BNB not convertion require
+
+    }else{
+      token memory getToken = getTokenBySymbol(get.token);  //get token price in wei
+      decimals = IBEP20(getToken._address).decimals(); // gets tokens decimals
+      tokensToFlower = calcTokentoBNB(getToken._price,TotalTokenReturn,decimals);
+    }
+   
+    //remove investment record
+    require(_removeInvestment(msg.sender,_investIndex),"removing error!!");
+
+    //sender recives flower with profit is like recived in BNB 
+    payFlower(msg.sender,tokensToFlower);
+
+    emit _withdrawInvestment(msg.sender,tokensToFlower);
+   
+  }
+
+  function invest(uint8 _planIndex) external payable{
+    require(internalTotalSupply() <= _totalMaxSupply,"Max Supply reached");
+    address ref = referrals[msg.sender]; // gets sender's referal
+    require(ref != address(0),"you must be referred by a member");
+    
+        //plan check
+        plan memory _plan = plans[_planIndex];
+
+        require(_plan.initialized ,"Plan not exist"); //checks pland index
+
+        
+        require(amountIsValid(_plan,msg.value),"amount is out of range");
+
+        bool registerSuccess = _recordInvestment(BNB,msg.sender, msg.value, _plan);
+        require(registerSuccess,"Error adding investment");
+
+         //pay flower fees with msg.value
+        payFlower(ref,msg.value.mul(referralCommission).div(100));
+        payFlower(HeadWallet,msg.value.mul(HeadWalletCommission).div(100));
+
+
+        // become a member
+        if(members[msg.sender] != true){
+          members[msg.sender]=true;
+        }
+        
+         emit _invest(msg.sender, msg.value , BNB);
+  }
+
+
+  function investToken(string calldata _tSymbol, uint8 _planIndex, uint256 _amount) external {
+
+   require(internalTotalSupply() <= _totalMaxSupply,"Max Supply reached");
+   require(tokenExist(_tSymbol),"Token not exist");
+
+    token memory getToken = getTokenBySymbol(_tSymbol); //gets current token
+
+    uint256  allowance = IBEP20(getToken._address).allowance(msg.sender ,address(this));
+
+   
+    // gets sender's referal
+    address ref = referrals[msg.sender]; 
+    require(ref != address(0),"you must be referred by a member");
+
+     //sender transfer token to contract
+    require(allowance >= _amount,"Insuficient Allowance");
+    bool transferSuccess = IBEP20(getToken._address).transferFrom(msg.sender,address(this),_amount);
+    require (transferSuccess,'transfer fail');
+    
+        //plan check
+        plan memory _plan = plans[_planIndex];
+        require(_plan.initialized ,"Plan not exist"); //checks pland index
+  
+        uint256 decimals = IBEP20(getToken._address).decimals(); // gets tokens decimals
+        uint256 tokenInFlower = calcTokentoBNB(getToken._price, _amount, decimals); //calc tokens to BNB
+
+       
+        
+        require(amountIsValid(_plan,tokenInFlower),"amount is out of range");
+
+        bool registerSuccess = _recordInvestment(_tSymbol,msg.sender, _amount, _plan);
+        require(registerSuccess,"Error adding field");
+
+         //pay flower fees with new get.mount
+        payFlower(ref,tokenInFlower.mul(referralCommission).div(100));
+        payFlower(HeadWallet,tokenInFlower.mul(HeadWalletCommission).div(100));
+
+
+        // become a member
+        if(members[msg.sender] != true){
+          members[msg.sender]=true;
+        }
+        
+         emit _invest(msg.sender, _amount , _tSymbol);
+  }
+
+
+  function reInvest(uint256 _investmentIndex)external returns(bool){
+    require(internalTotalSupply() <= _totalMaxSupply,"Max Supply reached");
+    //checks if investment is complete
+    require(_checkIfInvestmentIsReady(msg.sender,_investmentIndex) ,"the investment time has not been completed" );
+    investment memory get = investments[msg.sender][_investmentIndex];
+
+    get.timeStamp = block.timestamp; //set time over again
+    get.mount = get.mount.mul(get.returnMount).div(100); //this amount is in Token units not BNB
+
+    //updates investment
+    investments[msg.sender][_investmentIndex] = get;
+
+    address ref = referrals[msg.sender]; // gets sender's referal
+    uint256 tokenInFlower;
+    uint256 decimals;
+
+
+    //pay fee depending of investment token
+    if(compareStrings(get.token,BNB)){
+      tokenInFlower = get.mount;
+
+    }else{
+      token memory getToken = getTokenBySymbol(get.token);  //get token price in wei
+      decimals = IBEP20(getToken._address).decimals(); // gets tokens decimals
+      tokenInFlower = calcTokentoBNB(getToken._price, get.mount, decimals); //calc tokens
+
+    }
+     
+
+    //pay flower fees with new get.mount
+    payFlower(ref,tokenInFlower.mul(referralCommission).div(100));
+    payFlower(HeadWallet,tokenInFlower.mul(HeadWalletCommission).div(100));
+
+    emit _reInvest(msg.sender, get.mount , BNB);
+
+    return true;
+
+  }
+
+  function payFlower(address _to , uint256 _amount)internal returns(bool){
+    if(_balances[address(this)]>= _amount){
+        //take from contract's flower balance
+        _balances[address(this)] -= _amount;
+        _balances[_to] += _amount; //update FLOWER balance
+
+       }else{
+
+         //mint flowers
+        _balances[_to] += _amount; 
+        _totalSupply += _amount;
+      
+       }
+   
+
+  }
+
+
+  function swapFlower(uint256 _amount, string calldata _token)external returns (bool){
+
+    if(compareStrings(_token,BNB)){
+
+       //contract recives flower
+      _transfer(msg.sender,address(this),_amount);
+      address payable _to = msg.sender;
+
+      require(address(this).balance >= _amount,"No enougth BNB balance" );
+      //pay to sender
+      _to.transfer(_amount.mul(100-buySellCommission).div(100));
+
+
+    }else{
+
+      require(tokenExist(_token) ,"Token not exist");
+      token memory getToken = getTokenBySymbol(_token); //gets current token
+      //contract recives flower
+      
+      _transfer(msg.sender,address(this),_amount);
+
+      uint256 decimals = IBEP20(getToken._address).decimals(); // gets tokens decimals
+      uint256 flowerInToken = calcBNBtoToken(getToken._price, _amount, decimals); //calc tokens
+
+      require(IBEP20(getToken._address).balanceOf(address(this)) >= flowerInToken ,"insufficient Token balance");
+      bool success = IBEP20(getToken._address).transfer(msg.sender,flowerInToken.div(100).mul(100-buySellCommission)); //2% default
+      require(success,"transfer not done");
+      return success;
+    }
+
+
+    emit _swapFlower(msg.sender,"FLOWER",_token);
+    return true;
+
+
+  }
+
+
+  function buyFlower()external payable{
+    require(internalTotalSupply() <= _totalMaxSupply,"Max Supply reached");
+    require(msg.value >= 0.0026 ether, "minimun is 0.0026 BNB");
+    payFlower(msg.sender,msg.value);
+
+  }
+
+function calcBNBtoTokenExternal(uint256 _tokenPriceInWei ,uint256 _amountBNB, uint256 _tokenDecimals)internal pure returns (uint256){
+
+return calcBNBtoToken(_tokenPriceInWei,_amountBNB,_tokenDecimals);
+
+}
+
+function calcBNBtoToken(uint256 _tokenPriceInWei ,uint256 _amountBNB, uint256 _tokenDecimals)internal pure returns (uint256){
+
+  uint256 factor = 1 * 10 ** _tokenDecimals;
+  /*
+  return (_amountBNB / _tokenPriceInWei) * factor; //return tokens in it's WEI equivalent
+*/
+  return _amountBNB.mul(factor).div(_tokenPriceInWei);
+
+}
+
+function calcTokentoBNBExternal(uint256 _tokenPriceInWei ,uint256 _amountToken, uint256 _tokenDecimals)external view returns(uint256){
+
+  return calcTokentoBNB(_tokenPriceInWei,_amountToken,_tokenDecimals);
+}
+
+function calcTokentoBNB(uint256 _tokenPriceInWei ,uint256 _amountToken, uint256 _tokenDecimals)internal pure returns (uint256){
+
+uint256 factor = 1 * 10 ** _tokenDecimals; //example if decimals is 6 then factor is 1000000
+return  _amountToken.mul(_tokenPriceInWei).div(factor);
+
+}
+ 
+ 
+ /**
+   * @dev Returns the bep token owner.
+   */
+  function getOwner() external view returns (address) {
+    return owner();
+  }
+
+/**
+   * @dev Returns the max supply.
+   */
+  function maxTotalSupply() external view returns (uint256) {
+    return _totalMaxSupply;
+  }
+  /**
+   * @dev Returns the token decimals.
+   */
+  function decimals() external view returns (uint8) {
+    return _decimals;
+  }
+
+  /**
+   * @dev Returns the token symbol.
+   */
+  function symbol() external view returns (string memory) {
+    return _symbol;
+  }
+
+  /**
+  * @dev Returns the token name.
+  */
+  function name() external view returns (string memory) {
+    return _name;
+  }
+
+  /**
+   * @dev See {BEP20-totalSupply}.
+   */
+  function totalSupply() external view returns (uint256) {
+   // return _totalSupply - _balances[DEAD];
+    return internalTotalSupply();
+
+  }
+
+  function internalTotalSupply() internal view returns (uint256) {
+    return _totalSupply - _balances[DEAD];
+  }
+
+  
+
+  /**
+   * @dev See {BEP20-balanceOf}.
+   */
+  function balanceOf(address account) external view returns (uint256) {
+    return _balances[account];
+  }
+
+  /**
+   * @dev See {BEP20-transfer}.
+   *
+   * Requirements:
+   *
+   * - `recipient` cannot be the zero address.
+   * - the caller must have a balance of at least `amount`.
+   */
+  function transfer(address recipient, uint256 amount) external returns (bool) {
+    _transfer(_msgSender(), recipient, amount);
+    return true;
+  }
+
+
+//send tokens to DEAD wallet
+  function burn(address _from, uint256 _amount)internal returns (bool){
+    _transfer(_from, DEAD, _amount);
+    return true;
+  }
+
+  //send tokens to DEAD wallet
+  function _burn(uint256 _amount)external returns (bool){
+    burn(msg.sender,_amount);
+    return true;
+  }
+
+  /**
+   * @dev See {BEP20-allowance}.
+   */
+  function allowance(address owner, address spender) external view returns (uint256) {
+    return _allowances[owner][spender];
+  }
+
+  /**
+   * @dev See {BEP20-approve}.
+   *
+   * Requirements:
+   *
+   * - `spender` cannot be the zero address.
+   */
+  function approve(address spender, uint256 amount) external returns (bool) {
+    _approve(_msgSender(), spender, amount);
+    return true;
+  }
+
+  /**
+   * @dev See {BEP20-transferFrom}.
+   *
+   * Emits an {Approval} event indicating the updated allowance. This is not
+   * required by the EIP. See the note at the beginning of {BEP20};
+   *
+   * Requirements:
+   * - `sender` and `recipient` cannot be the zero address.
+   * - `sender` must have a balance of at least `amount`.
+   * - the caller must have allowance for `sender`'s tokens of at least
+   * `amount`.
+   */
+  function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {
+    _transfer(sender, recipient, amount);
+    _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "BEP20: transfer amount exceeds allowance"));
+    return true;
+  }
+
+  /**
+   * @dev Atomically increases the allowance granted to `spender` by the caller.
+   *
+   * This is an alternative to {approve} that can be used as a mitigation for
+   * problems described in {BEP20-approve}.
+   *
+   * Emits an {Approval} event indicating the updated allowance.
+   *
+   * Requirements:
+   *
+   * - `spender` cannot be the zero address.
+   */
+  function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
+    _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
+    return true;
+  }
+
+  /**
+   * @dev Atomically decreases the allowance granted to `spender` by the caller.
+   *
+   * This is an alternative to {approve} that can be used as a mitigation for
+   * problems described in {BEP20-approve}.
+   *
+   * Emits an {Approval} event indicating the updated allowance.
+   *
+   * Requirements:
+   *
+   * - `spender` cannot be the zero address.
+   * - `spender` must have allowance for the caller of at least
+   * `subtractedValue`.
+   */
+  function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
+    _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "BEP20: decreased allowance below zero"));
+    return true;
+  }
+
+
+  /**
+   * @dev Moves tokens `amount` from `sender` to `recipient`.
+   *
+   * This is internal function is equivalent to {transfer}, and can be used to
+   * e.g. implement automatic token fees, slashing mechanisms, etc.
+   *
+   * Emits a {Transfer} event.
+   *
+   * Requirements:
+   *
+   * - `sender` cannot be the zero address.
+   * - `recipient` cannot be the zero address.
+   * - `sender` must have a balance of at least `amount`.
+   */
+  function _transfer(address sender, address recipient, uint256 amount) internal {
+    require(sender != address(0), "BEP20: transfer from the zero address");
+    require(recipient != address(0), "BEP20: transfer to the zero address");
+
+    _balances[sender] = _balances[sender].sub(amount, "BEP20: transfer amount exceeds balance");
+    _balances[recipient] = _balances[recipient].add(amount);
+    emit Transfer(sender, recipient, amount);
+  }
+
+  /**
+   * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
+   *
+   * This is internal function is equivalent to `approve`, and can be used to
+   * e.g. set automatic allowances for certain subsystems, etc.
+   *
+   * Emits an {Approval} event.
+   *
+   * Requirements:
+   *
+   * - `owner` cannot be the zero address.
+   * - `spender` cannot be the zero address.
+   */
+  function _approve(address owner, address spender, uint256 amount) internal {
+    require(owner != address(0), "BEP20: approve from the zero address");
+    require(spender != address(0), "BEP20: approve to the zero address");
+
+    _allowances[owner][spender] = amount;
+    emit Approval(owner, spender, amount);
+  }
+
+ 
+    function getContractBalance()external view returns (uint256){
+        return address(this).balance;
+    }
+
+    function getContractTokenBalance(string calldata _token)external view returns (uint256){
+       token memory getToken = getTokenBySymbol(_token); //gets current token
+      return IBEP20(getToken._address).balanceOf(address(this));
+    }
+
+
+
+
+}
